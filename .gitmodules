@@ -1,0 +1,3 @@
+[submodule "vendor/mod"]
+	path = vendor/mod
+	url = https://github.com/jhalme/webaudio-mod-player.git

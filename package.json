@@ -24,6 +24,7 @@
     "cryptology": "^1.0.0",
     "jsxm": "^1.0.1",
     "picofeed": "^1.2.0",
-    "sirv-cli": "^0.4.4"
+    "sirv-cli": "^0.4.4",
+    "standard": "^14.3.3"
   }
 }
