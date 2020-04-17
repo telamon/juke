@@ -1,13 +1,18 @@
 import svelte from 'rollup-plugin-svelte'
+// import inject from '@rollup/plugin-inject'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import livereload from 'rollup-plugin-livereload'
 import { terser } from 'rollup-plugin-terser'
-import { sizeSnapshot } from 'rollup-plugin-size-snapshot'
 import builtins from 'rollup-plugin-node-builtins'
 import globals from 'rollup-plugin-node-globals'
+import crass from 'crass'
+import analyze from 'rollup-plugin-analyzer'
 
 const production = !process.env.ROLLUP_WATCH
+
+// On creating a pipeline for outputting html.
+// https://github.com/bdadam/rollup-plugin-html
 
 export default {
   input: 'src/main.js',
@@ -24,6 +29,7 @@ export default {
       // we'll extract any component CSS out into
       // a separate file - better for performance
       css: css => {
+        // TODO: merge with global.css and inject into head.
         css.write('public/build/bundle.css')
       }
     }),
@@ -35,9 +41,14 @@ export default {
     // https://github.com/rollup/plugins/tree/master/packages/commonjs
     resolve({
       browser: true,
-      dedupe: ['svelte', 'sodium-universal']
+      dedupe: ['svelte', 'sodium-universal'],
+      preferBuiltins: true // <-- If this refers to builtins below then yes.
     }),
-    commonjs(),
+
+    commonjs({
+      namedExports: {
+      }
+    }),
 
     // These should probably be replaced by injecting
     // https://github.com/feross/buffer
@@ -52,12 +63,12 @@ export default {
     // browser on changes when not in production
     !production && livereload('public'),
 
-    // bundle size stats
-    production && sizeSnapshot(),
+    production && analyze({ summaryOnly: true }),
 
     // If we're building for production (npm run build
     // instead of npm run dev), minify
-    production && terser(),
+    production && terser({ output: { comments: false } }),
+
     production && petrify('public/index.html', 'docs/index.html')
   ],
   watch: {
@@ -65,11 +76,11 @@ export default {
   }
 }
 
-function serve() {
+function serve () {
   let started = false
 
   return {
-    writeBundle() {
+    writeBundle () {
       if (!started) {
         started = true
 
@@ -82,7 +93,6 @@ function serve() {
   }
 }
 
-
 const { readFileSync, writeFileSync, mkdirSync } = require('fs')
 const { dirname } = require('path')
 function petrify (input, output) {
@@ -90,27 +100,35 @@ function petrify (input, output) {
     writeBundle (opts, bundle) {
       let html = readFileSync(input).toString('utf8')
 
-      // inline js
-      for (const name in bundle) {
-        const artefact = bundle[name]
-        // inline js when found.
-        const rexp = new RegExp(`<script[^>]+src=[^>]+${artefact.fileName}[^>]+>`)
-        if (html.match(rexp)) {
-          console.log('Inlining artefact', name)
-          html = html.replace(rexp, `<script>window.addEventListener('DOMContentLoaded',ev => { ${artefact.code} })`)
-        }
+      // fugly inline css
+      const cexp = new RegExp('<link[^>]+href=[\'"]([^\'"]+.css)[\'"][^>]*>')
+
+      let m
+      while ((m = html.match(cexp))) {
+        const file = `public${m[1]}`
+        const css = crass.parse(readFileSync(file))
+          .optimize({ o1: true })
+        console.log(`Inlining ${file}`)
+        html = html.replace(m[0], `
+  <!-- inline ${file} -->
+  <style>${css.toString()}</style>
+        `)
       }
 
-      // fugly inline css
-      const cexp = new RegExp(`<link[^>]+href=['"]([^'"]+\.css)['"][^>]*>`)
-      let m
-      while (m = html.match(cexp)) {
-        const file = `public${m[1]}`
-        const css = readFileSync(file)
-        console.log(`Inlining ${file}`)
-        html = html.replace(m[0], `<!-- inline ${file} -->
-          <style>${css.toString('utf8')}</style>
-        `)
+      // inline js
+      for (const name in bundle) {
+        const artifact = bundle[name]
+        // inline js when found.
+        const rexp = new RegExp(`<script[^>]+src=[^>]+${artifact.fileName}[^>]+>`)
+        if (html.match(rexp)) {
+          console.log('Inlining artifact', name)
+          const chunks = html.replace(rexp, '<script>¤¤¤PITA¤¤¤')
+            .split('¤¤¤PITA¤¤¤')
+
+          const code = 'window.addEventListener(\'DOMContentLoaded\',ev => {\n' +
+                        artifact.code + '\n})'
+          html = chunks[0] + code + chunks[1]
+        }
       }
       // write out the destination
       mkdirSync(dirname(output), { recursive: true })

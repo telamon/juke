@@ -1,10 +1,12 @@
 import { Identity } from 'cryptology'
-import Feed from 'picofeed'
+// import Feed from 'picofeed'
 import PlayerStore from './player-store'
+// import Player from '../vendor/mod/js/player.js'
+
 import App from './App.svelte'
 // Todo: turn this into standalone-module
 const initIdentity = () => {
-  const stored = localStorage.getItem('identity')
+  const stored = window.localStorage.getItem('identity')
   if (!stored) {
     const id = new Identity()
     window.localStorage.setItem('identity', Identity.encode(id))
@@ -19,16 +21,15 @@ const uid = initIdentity()
 const player = new PlayerStore()
 // --- end of uid
 
-
 // import 'jsxm/xm'
 // import 'jsxm/xmeffects'
 
 const app = new App({
-	target: document.body,
-	props: {
-		uid,
+  target: document.body,
+  props: {
+    uid,
     player
-	}
-});
+  }
+})
 
 export default app
