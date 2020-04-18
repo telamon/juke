@@ -1,47 +1,98 @@
 <script>
-export let uid
-export let player
+export let bin
+export let importFile
+
+import { derived, readable } from 'svelte/store'
+import ModPlayer from '../vendor/mod'
+
+const emptyState = {
+title: 'YGYL',
+signature: '<noname>',
+desc: `
+     (\\  (\\ /)  /)
+    (' \\.(*v*)./ ')
+    ',_/       \\_,'
+       (__ . __)
+       (,,) (,,)
+DROP YOUR GROOVES HERE
+        - h00`
+}
+
+const player = new ModPlayer()
+
+// tune store notifies ui of player changes..
+const tune = readable(emptyState, set => {
+  player._emit = (ev, data) => {
+    switch(ev) {
+      case 'state':
+        set({
+          state: data,
+          title: player.title,
+          signature: player.signature,
+          songLength: player.songLength,
+          // channels: player.channels,
+          // patterns: player.patterns,
+          sampleNames: player.sampleNames,
+          desc: player.desc
+        })
+        break
+    }
+  }
+})
+let isEmpty = true
+// This store is just a consumer of changes to binary
+// e.g. loads the casette ;)
+bin.subscribe(b => {
+  if (!b.data || !b.data.length) return
+  isEmpty = false
+  const { name, type, data } = b
+  console.log('Inserting casette', name, type)
+  const ext = name.split('.')
+  const t = type.length ? type : ext[ext.length - 1]
+  player.loadBuffer(t, data)
+  player.play()
+})
+
+const eject = () => {
+  player.stop()
+  isEmpty = true
+}
 
 const onFileChange = ev => {
   const files = ev.target.files || ev.dataTransfer.files
   if (!files.length) return
   const f = files.item(0)
-
   f.arrayBuffer()
     .then(buffer => {
-      player.loadBuffer(f.type, buffer)
+      importFile({
+        type: f.type,
+        name: f.name,
+        data: ModPlayer.normBuffer(buffer)
+      })
     })
+    .catch(console.error)
 }
 </script>
 
 <main>
-  User ID: {uid.sig.pub.toString('hex')}
-  <h1>YGYL</h1>
-  <input type="file" on:change={onFileChange}/>
-  <button on:click={player.play.bind(player)}>Play</button>
-  <button on:click={player.stop.bind(player)}>Stop</button>
-  <p>pay your respects if you lost</p>
-  <p><a href="https://kek">Make your own groove link</a><p>
+  <section class="player">
+    <h1>{$tune.title}</h1>
+    <h2 class="disc"
+        class:playing={$tune.state === 2}
+        on:click={() => player.state === 2 ? player.pause() : player.play()}
+        >📀</h2>
+    <br/>
+    <pre class="desc">{$tune.desc}</pre>
+  </section>
+  <section class="melodymaker">
+    <input type="file" on:change={onFileChange}/>
+    <button on:click={player.play.bind(player)}>Play</button>
+    <button on:click={player.stop.bind(player)}>Stop</button>
+
+  </section>
+
+[⏏️] -eject
 </main>
 
 <style>
-	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
-	}
-
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
-	}
-
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
-	}
 </style>

@@ -6,6 +6,10 @@ Refs:
 - https://github.com/deskjet/chiptune2.js
 - https://github.com/a1k0n/jsxm/
 
+# midisupport
+https://www.npmjs.com/package/soundfont-player
+https://github.com/gleitz/midi-js-soundfonts
+
 ## Building and running in production mode
 
 To create an optimised version of the app:

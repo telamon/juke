@@ -1,0 +1,18 @@
+syntax = "proto3";
+message File {
+  uint64 date = 1;
+  bytes data = 3;
+  string type = 4;
+  string name = 5;
+  // 0 raw
+  // 1 deflate
+  // 2 brotli
+  uint32 encoding = 6;
+}
+
+message JukeMessage {
+  oneof msg {
+    File tune = 1;
+  }
+  int32 theme = 2;
+}
