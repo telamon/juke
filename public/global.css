@@ -113,5 +113,8 @@ h1 {
 .vuMeters meter {
   display: inline-block;
   transform: rotate(-90deg);
-  width: 30px;
+  width: 25px;
 }
+
+footer { font-size: smaller; color: #bbb; text-align: center; margin-top: auto; }
+footer a, footer a:visited { color: #bbb !important; }

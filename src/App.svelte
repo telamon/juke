@@ -116,7 +116,7 @@ const onDragover = ev => { dragOver = true }
       {#each $vu as ch}
         <meter id="fuel"
                min="0" max="1"
-              low="20" high="66" optimum="50"
+              low="0.2" high="0.6" optimum="0.5"
                                  value={ch}>
 
         </meter>
@@ -131,9 +131,11 @@ const onDragover = ev => { dragOver = true }
     </p>
     <pre class="desc">{$tune.desc}</pre>
     {#if isEmpty}
-      <input type="file" on:change={onFileChange}/>
+      <!-- for devices that don't have DnD -->
+      <div><input type="file" on:change={onFileChange}/></div>
     {/if}
   </section>
+  <footer><a href="http://decentlabs.se">copyright © DecentLabs 2020 - License GNU AGPLv3</a> <a href="https://github.com/telamon/juke/">Source</a></footer>
   <!-- not used
   <section class="melodymaker">
     <button on:click={player.play.bind(player)}>Play</button>
