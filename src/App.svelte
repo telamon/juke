@@ -8,7 +8,7 @@ import ModPlayer from '../vendor/mod'
 // import dbnc from 'debounce'
 
 const emptyState = {
-title: 'YGYL',
+title: 'Juke',
 signature: '<noname>',
 desc: `
      (\\  (\\ /)  /)
@@ -61,8 +61,10 @@ bin.subscribe(b => {
 })
 
 const eject = () => {
-  player.stop()
-  isEmpty = true
+  window.location.hash = ''
+  window.location.reload()
+  // player.stop()
+  // isEmpty = true
 }
 
 const processFile = file => {
@@ -123,7 +125,7 @@ const onDragover = ev => { dragOver = true }
       {/each}
     </div>
     <p>
-    {#if !$error}
+    {#if !$error && !isEmpty}
       <a href={'#' + $pickle} style="color: green;">🥒Pickle Link</a>
     {:else}
       <span style="color: red;">{$error}</span>
@@ -133,6 +135,8 @@ const onDragover = ev => { dragOver = true }
     {#if isEmpty}
       <!-- for devices that don't have DnD -->
       <div><input type="file" on:change={onFileChange}/></div>
+    {:else}
+      <div><button class="ejectButton" on:click={eject}>⏏️</button></div>
     {/if}
   </section>
   <footer><a href="http://decentlabs.se">copyright © DecentLabs 2020 - License GNU AGPLv3</a> <a href="https://github.com/telamon/juke/">Source</a></footer>

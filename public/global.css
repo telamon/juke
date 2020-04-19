@@ -76,9 +76,15 @@ main {
   padding-bottom: 1em;
 }
 .desc {
-  text-align: left;
-  display: inline-block;
-  margin: 4px auto;
+	text-align: left;
+	display: inline-block;
+	margin: 4px auto;
+	border: 1px solid #70809024;
+	color: #555;
+	padding: 2em;
+	border-radius: 1pt;
+	background-color: #b4f0e8;
+	font-weight: bold;
 }
 
 @keyframes spin {
@@ -118,3 +124,12 @@ h1 {
 
 footer { font-size: smaller; color: #bbb; text-align: center; margin-top: auto; }
 footer a, footer a:visited { color: #bbb !important; }
+
+.ejectButton {
+  border-radius: 100%;
+  display: inline-block;
+  width: 2em;
+  height: 2em;
+  line-height: 2em;
+  padding: 0;
+}
