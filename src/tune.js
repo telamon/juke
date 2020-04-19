@@ -6,9 +6,31 @@ import { JukeMessage } from './messages'
 
 export function compress (input, opts) {
   input = Buffer.from(input)
-  return defer(d => deflateRaw(input, opts, d))
+  const algo = 1
+
+  return defer(done => {
+    switch (algo) {
+      case 0:
+        return new Promise(input)
+      case 1:
+        return deflateRaw(input, { level: 9 }, done)
+
+        /* zlib.brotliDecompress dosen't exist in browser.
+      case 2:
+        const brotliOpts = {
+          chunkSize: 32 * 1024,
+          params: {
+            [zlib.constants.BROTLI_PARAM_MODE]: zlib.constants.BROTLI_MODE_TEXT,
+            [zlib.constants.BROTLI_PARAM_QUALITY]: 10,
+            [zlib.constants.BROTLI_PARAM_SIZE_HINT]: input.size
+          }
+        }
+        return brotliCompress(input, done)
+        */
+    }
+  })
     .then(output => {
-      console.info(`compressed ${input.length} -> ${output.length}, ${output.length / input.length}`)
+      console.info(`compressed ${algo} ${input.length} -> ${output.length}, ${output.length / input.length}`)
       return output
     })
 }
@@ -52,4 +74,5 @@ class PicoTune extends PicoFeed {
     }
   }
 }
+
 export default PicoTune

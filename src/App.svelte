@@ -1,9 +1,11 @@
 <script>
 export let bin
 export let importFile
-
-import { derived, readable } from 'svelte/store'
+export let pickle
+export let error
+import { writable, derived, readable } from 'svelte/store'
 import ModPlayer from '../vendor/mod'
+// import dbnc from 'debounce'
 
 const emptyState = {
 title: 'YGYL',
@@ -19,9 +21,10 @@ DROP YOUR GROOVES HERE
 }
 
 const player = new ModPlayer()
-
+const vu = writable([])
 // tune store notifies ui of player changes..
 const tune = readable(emptyState, set => {
+  let tickCtr = 0
   player._emit = (ev, data) => {
     switch(ev) {
       case 'state':
@@ -35,6 +38,10 @@ const tune = readable(emptyState, set => {
           sampleNames: player.sampleNames,
           desc: player.desc
         })
+        break
+      case 'tick':
+        if (++tickCtr % 2) break
+        vu.set(data.chvu)
         break
     }
   }
@@ -58,23 +65,46 @@ const eject = () => {
   isEmpty = true
 }
 
-const onFileChange = ev => {
-  const files = ev.target.files || ev.dataTransfer.files
-  if (!files.length) return
-  const f = files.item(0)
-  f.arrayBuffer()
+const processFile = file => {
+  return file.arrayBuffer()
     .then(buffer => {
       importFile({
-        type: f.type,
-        name: f.name,
+        type: file.type,
+        name: file.name,
         data: ModPlayer.normBuffer(buffer)
       })
     })
     .catch(console.error)
 }
-</script>
+const onFileChange = ev => {
+  const files = ev.target.files || ev.dataTransfer.files
+  if (!files.length) return
+  const f = files.item(0)
+  processFile(f)
+}
 
-<main>
+let dragOver = false
+const onDrop = ev => {
+  dragOver = false
+  if (ev.dataTransfer.items) {
+    // Use DataTransferItemList interface to access the file(s)
+    for (var i = 0; i < ev.dataTransfer.items.length; i++) {
+      // If dropped items aren't files, reject them
+      if (ev.dataTransfer.items[i].kind === 'file') {
+        return processFile(ev.dataTransfer.items[i].getAsFile())
+      }
+    }
+  } else {
+    // Use DataTransfer interface to access the file(s)
+    for (var i = 0; i < ev.dataTransfer.files.length; i++) {
+      return processFile(ev.dataTransfer.files[i].name)
+    }
+  }
+}
+const onDragover = ev => { dragOver = true }
+</script>
+<main on:drop|preventDefault={onDrop}
+      on:dragover|preventDefault={onDragover}>
   <section class="player">
     <h1>{$tune.title}</h1>
     <h2 class="disc"
@@ -82,16 +112,35 @@ const onFileChange = ev => {
         on:click={() => player.state === 2 ? player.pause() : player.play()}
         >📀</h2>
     <br/>
+    <div class="vuMeters">
+      {#each $vu as ch}
+        <meter id="fuel"
+               min="0" max="1"
+              low="20" high="66" optimum="50"
+                                 value={ch}>
+
+        </meter>
+      {/each}
+    </div>
+    <p>
+    {#if !$error}
+      <a href={'#' + $pickle} style="color: green;">🥒Pickle Link</a>
+    {:else}
+      <span style="color: red;">{$error}</span>
+    {/if}
+    </p>
     <pre class="desc">{$tune.desc}</pre>
+    {#if isEmpty}
+      <input type="file" on:change={onFileChange}/>
+    {/if}
   </section>
+  <!-- not used
   <section class="melodymaker">
-    <input type="file" on:change={onFileChange}/>
     <button on:click={player.play.bind(player)}>Play</button>
     <button on:click={player.stop.bind(player)}>Stop</button>
+    [⏏️]
 
-  </section>
-
-[⏏️] -eject
+  </section>-->
 </main>
 
 <style>

@@ -45,8 +45,9 @@ if (model.length) {
 }
 
 const pickle = writable('')
+const error = writable(0)
 // This might leak your song before release.
-pickle.subscribe(p => { if (p.length) window.location.hash = p })
+// pickle.subscribe(p => { if (p.length) window.location.hash = p })
 
 const pack = (f) => {
   if (!f || !f.data) return
@@ -60,10 +61,12 @@ const pack = (f) => {
     .then(file => {
       pickle.set(model.pickle())
       binarySong.set(file)
+      error.set(0)
     })
     .catch(err => {
       binarySong.set(f) // let the user play the song anyway.
-      pickle.set('ERROR_SONG_TOO_BIG')
+      pickle.set(0)
+      error.set('ERROR_SONG_TOO_BIG')
       console.error(err)
     })
 }
@@ -74,7 +77,9 @@ const app = new App({
   target: document.body,
   props: {
     bin: binarySong,
-    importFile
+    importFile,
+    pickle,
+    error
   }
 })
 
