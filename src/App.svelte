@@ -50,6 +50,7 @@ let isEmpty = true
 // This store is just a consumer of changes to binary
 // e.g. loads the casette ;)
 bin.subscribe(b => {
+  // error.set(b && b.data)
   if (!b.data || !b.data.length) return
   isEmpty = false
   const { name, type, data } = b
@@ -126,7 +127,7 @@ const onDragover = ev => { dragOver = true }
     </div>
     <p>
     {#if !$error && !isEmpty}
-      <a href={'#' + $pickle} style="color: green;">🥒Pickle Link</a>
+      <a href={'#' + $pickle} style="color: green;">🥒Pickle Link</a> ({Math.round($pickle.length / 10.24)/100}kB)
     {:else}
       <span style="color: red;">{$error}</span>
     {/if}

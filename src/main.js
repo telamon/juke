@@ -1,9 +1,10 @@
-import { writable, derived, readable } from 'svelte/store'
+import { writable } from 'svelte/store'
 import { Identity } from 'cryptology'
 import PicoTune from './tune'
 // import Player from '../vendor/mod/js/player.js'
 
 import App from './App.svelte'
+const error = writable(-1)
 // Todo: turn this into standalone-module
 const initIdentity = () => {
   const stored = window.localStorage.getItem('identity')
@@ -24,9 +25,12 @@ const model = new PicoTune()
 const clear = () => { /* eject? */ }
 try {
   const url = new URL(window.location)
-  if (url.hash.length) model.merge(url)
-  else clear()
+  if (url.hash.length) {
+    error.set('merged')
+    model.merge(url)
+  } else clear()
 } catch (err) {
+  error.set(err.message)
   console.warn('Failed to load URL', err)
   console.info('Loading default sample')
   clear()
@@ -37,15 +41,20 @@ const imp = writable(0)
 const importFile = file => {
   imp.set(file)
 }
-
+error.set('check model len:' + model.length)
 if (model.length) {
   // theme.set(card.theme)
+  error.set('getFile')
   model.getFile()
-    .then(file => binarySong.set(file))
+    .then(file => {
+      error.set('File fetched')
+      binarySong.set(file)
+      error.set(0)
+    })
+    .catch(err => error.set(err.message))
 }
 
 const pickle = writable('')
-const error = writable(0)
 // This might leak your song before release.
 // pickle.subscribe(p => { if (p.length) window.location.hash = p })
 
