@@ -1,6 +1,6 @@
 # self-contained Jukebox
 
-### DEMO: https://t.co/8QJEfZa4Yb?amp=1
+### DEMO: https://t.co/8QJEfZa4Yb (Turn down your volume before clicking)
 
 Refs:
 
@@ -12,7 +12,7 @@ Refs:
 https://www.npmjs.com/package/soundfont-player
 https://github.com/gleitz/midi-js-soundfonts
 
-
+## Ad & Apology
 ```ad
  _____                      _   _           _
 |  __ \   Help Wanted!     | | | |         | |
