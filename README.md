@@ -1,4 +1,6 @@
-# cybermite
+# self-contained Jukebox
+
+### DEMO: https://t.co/8QJEfZa4Yb?amp=1
 
 Refs:
 
@@ -9,6 +11,33 @@ Refs:
 # midisupport
 https://www.npmjs.com/package/soundfont-player
 https://github.com/gleitz/midi-js-soundfonts
+
+
+```ad
+ _____                      _   _           _
+|  __ \   Help Wanted!     | | | |         | |
+| |  | | ___  ___ ___ _ __ | |_| |     __ _| |__  ___   ___  ___
+| |  | |/ _ \/ __/ _ \ '_ \| __| |    / _` | '_ \/ __| / __|/ _ \
+| |__| |  __/ (_|  __/ | | | |_| |___| (_| | |_) \__ \_\__ \  __/
+|_____/ \___|\___\___|_| |_|\__|______\__,_|_.__/|___(_)___/\___|
+
+If you're reading this it means that the docs are missing or in a bad state.
+
+My research is generating code at a higher rate than documentation,
+thus you have my sincere apologies.
+
+If you have any questions, PLEASE OPEN AN ISSUE -
+I'll do my best to happily provide an answer.
+
+I publish all of my work as Libre software and will continue to do so,
+drop me a penny at Patreon and help fund experiments like these.
+
+Patreon: https://www.patreon.com/decentlabs
+Discord: https://discord.gg/K5XjmZx
+Telegram: https://t.me/decentlabs_se
+```
+
+
 
 ## Building and running in production mode
 
